@@ -2,7 +2,7 @@
 
 [![Autonomous Synthesis](https://img.shields.io/badge/Synthesized%20By-sovLoop%20(Stealth)-0A66C2?style=for-the-badge)](#how-this-pipeline-was-built)
 [![Foundation LLM](https://img.shields.io/badge/Model-qwen3.5%3A9b-111827?style=for-the-badge)](#how-this-pipeline-was-built)
-[![Validation](https://img.shields.io/badge/5--Fold%20OOF-INTERVAL_F1%200.52070-059669?style=for-the-badge)](#verified-validation-benchmark)
+[![Validation](https://img.shields.io/badge/5--Fold%20OOF-INTERVAL_F1%200.54151-059669?style=for-the-badge)](#verified-validation-benchmark)
 [![Security](https://img.shields.io/badge/Zero--Pickle-CWE--502%20Compliant-374151?style=for-the-badge)](#governance--production-guarantees)
 [![Kaggle Public Notebook](https://img.shields.io/badge/Kaggle%20Notebook-Public%20Kernel-20BEFF?style=for-the-badge)](https://www.kaggle.com/code/stefanoclss/mabe-mouse-behavior-detection)
 [![Kaggle Challenge](https://img.shields.io/badge/Challenge-Benchmark-0284C7?style=for-the-badge)](https://www.kaggle.com/competitions/MABe-mouse-behavior-detection)
@@ -14,7 +14,7 @@
 
 ## Executive Overview
 
-Predict `event_active` (binary classification) across `84` structured predictors on `MABe-mouse-behavior-detection` under strict leak-free 5-fold out-of-fold validation to maximize `INTERVAL_F1`.
+Predict `event_active` (binary classification) across `86` structured predictors on `MABe-mouse-behavior-detection` under strict leak-free 5-fold out-of-fold validation to maximize `INTERVAL_F1`.
 
 Production data science teams need pipelines that are not only accurate, but **readable, explainable, and maintainable**. Every transformation in this repository is organized by pipeline topology stage (`preprocessing`, `feature_engineering`, `objective`, `models`, `postprocess`) and validated incrementally via **sovLoop** (operating in private stealth mode).
 
@@ -37,8 +37,8 @@ Production data science teams need pipelines that are not only accurate, but **r
 | **Target Variable (`y`)** | `event_active` (`binary_classification`) |
 | **Evaluation KPI** | `INTERVAL_F1` (Higher is better) |
 | **Baseline 5-Fold OOF Score** | `0.00000` |
-| **Champion 5-Fold OOF Score** | **`0.52070`** (`+0.52070` verified lift vs. baseline) |
-| **Cross-Fold Stability (Std. Dev.)** | `±0.01118` across `5` strict folds |
+| **Champion 5-Fold OOF Score** | **`0.54151`** (`+0.54151` verified lift vs. baseline) |
+| **Cross-Fold Stability (Std. Dev.)** | `±0.01171` across `5` strict folds |
 | **Synthesis LLM** | `qwen3.5:9b` (via **sovLoop**) |
 
 ---
@@ -49,7 +49,7 @@ Every individual model inside the unrestricted ensemble is benchmarked independe
 
 | Model Family (`key`) | Standalone Val Score | Mean Fold Fit | Mean Fold Inference | Ensemble Weight | Deployment Role |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **CatBoost Symmetric** (`catboost`) | `0.84321 ± 0.02095` | `22850.3 ms` | `107.02 ms` | `100.0%` | `Best Solo + Fastest SLA` |
+| **CatBoost Symmetric** (`catboost`) | `0.84221 ± 0.02089` | `20248.1 ms` | `119.84 ms` | `100.0%` | `Best Solo + Fastest SLA` |
 
 ---
 
@@ -62,6 +62,7 @@ Every row below corresponds to a verified out-of-fold promotion recorded as an *
 | **Gen 0** | `scaffold` | Baseline initialization | `0.00000` | `baseline` | Deterministic 5-fold leak-free baseline anchor |
 | **Gen 1** | `pipeline/models.py` | `temporal_1d_tcn_bigru`, `catboost_tuned` | `0.46868` | `+0.46868` | Replacing the linear ridge baseline with a Temporal Convolutional Network combined with CatBoost will capture non-linear temporal dependencies and... |
 | **Gen 2** | `pipeline/postprocess.py` | `optimal_threshold_tune`, `interval_event_decoder` | `0.52070` | `+0.05202` | Applying OOF Platt calibration followed by a Non-Overlapping Multi-Action Interval Decoder will align the training target transform with the INTERVAL_F1... |
+| **Gen 3** | `pipeline/models.py` | `temporal_1d_tcn_bigru`, `catboost_tuned`, `temporal_1d_multiscale_conv` | `0.54151` | `+0.02081` | Coordinate-ascent probe on `model`: Test 3-model ensemble adding `Multi-Scale Inception-1D + SE + BiGRU Event Detector (GPU)` |
 
 ---
 
@@ -69,13 +70,13 @@ Every row below corresponds to a verified out-of-fold promotion recorded as an *
 
 ```mermaid
 flowchart LR
-    DATA["Raw Data (84 predictors)"] --> SPLIT["5-Fold CV Split"]
+    DATA["Raw Data (86 predictors)"] --> SPLIT["5-Fold CV Split"]
     SPLIT --> PRE["1. Preprocessing: mean_impute"]
     PRE --> FEAT["2. Features: raw_passthrough"]
     FEAT --> OBJ["3. Objective: standard_task_loss"]
     OBJ --> M0["4. Ensemble: CatBoost Symmetric (100%)"]
     M0 --> POST["5. Post-Processing: optimal_threshold_tune, interval_event_decoder"]
-    POST --> OUT["5-Fold OOF & Holdout (INTERVAL_F1 = 0.52070)"]
+    POST --> OUT["5-Fold OOF & Holdout (INTERVAL_F1 = 0.54151)"]
 ```
 
 | Deliverable | Role in Production Workflow |
