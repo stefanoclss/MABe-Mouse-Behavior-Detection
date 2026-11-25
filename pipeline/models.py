@@ -2,7 +2,7 @@
 
 Synthesized by sovLoop (Model: qwen3.5:9b)
 Target: `event_active` (binary_classification | INTERVAL_F1)
-Active Model Operations: temporal_1d_tcn_bigru, catboost_tuned, temporal_1d_multiscale_conv
+Active Model Operations: temporal_1d_tcn_bigru, catboost_tuned, temporal_1d_multiscale_conv, temporal_1d_unet_gru
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ import pandas as pd
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-ACTIVE_MODEL_OPS: tuple[str, ...] = ('temporal_1d_tcn_bigru', 'catboost_tuned', 'temporal_1d_multiscale_conv')
+ACTIVE_MODEL_OPS: tuple[str, ...] = ('temporal_1d_tcn_bigru', 'catboost_tuned', 'temporal_1d_multiscale_conv', 'temporal_1d_unet_gru')
 IS_BINARY_TASK: bool = "binary_classification" == "binary_classification"
 
 
