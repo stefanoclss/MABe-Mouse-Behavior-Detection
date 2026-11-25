@@ -1,14 +1,14 @@
 """Stage 5 · Prediction Calibration & Post-Processing (`pipeline/postprocess.py`).
 
 Synthesized by sovLoop (Model: qwen3.5:9b)
-Active Operations: interval_event_decoder
+Active Operations: optimal_threshold_tune, interval_event_decoder
 """
 
 from __future__ import annotations
 
 import numpy as np
 
-ACTIVE_POSTPROCESS_OPS: tuple[str, ...] = ('interval_event_decoder',)
+ACTIVE_POSTPROCESS_OPS: tuple[str, ...] = ('optimal_threshold_tune', 'interval_event_decoder')
 
 
 def _pav_monotonic_curve(preds: np.ndarray, y_ref: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
