@@ -2,7 +2,7 @@
 
 Synthesized by sovLoop (Model: qwen3.5:9b)
 Target: `event_active` (binary_classification | INTERVAL_F1)
-Active Model Operations: ridge_alpha_1.0
+Active Model Operations: catboost_tuned
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ import pandas as pd
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-ACTIVE_MODEL_OPS: tuple[str, ...] = ('ridge_alpha_1.0',)
+ACTIVE_MODEL_OPS: tuple[str, ...] = ('catboost_tuned',)
 IS_BINARY_TASK: bool = "binary_classification" == "binary_classification"
 
 
