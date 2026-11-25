@@ -2,7 +2,7 @@
 
 [![Autonomous Synthesis](https://img.shields.io/badge/Synthesized%20By-sovLoop%20(Stealth)-0A66C2?style=for-the-badge)](#how-this-pipeline-was-built)
 [![Foundation LLM](https://img.shields.io/badge/Model-qwen3.5%3A9b-111827?style=for-the-badge)](#how-this-pipeline-was-built)
-[![Validation](https://img.shields.io/badge/5--Fold%20OOF-INTERVAL_F1%200.84025-059669?style=for-the-badge)](#verified-validation-benchmark)
+[![Validation](https://img.shields.io/badge/5--Fold%20OOF-INTERVAL_F1%200.38043-059669?style=for-the-badge)](#verified-validation-benchmark)
 [![Security](https://img.shields.io/badge/Zero--Pickle-CWE--502%20Compliant-374151?style=for-the-badge)](#governance--production-guarantees)
 [![Kaggle Public Notebook](https://img.shields.io/badge/Kaggle%20Notebook-Public%20Kernel-20BEFF?style=for-the-badge)](https://www.kaggle.com/code/stefanoclss/mabe-mouse-behavior-detection)
 [![Kaggle Challenge](https://img.shields.io/badge/Challenge-Benchmark-0284C7?style=for-the-badge)](https://www.kaggle.com/competitions/MABe-mouse-behavior-detection)
@@ -14,7 +14,7 @@
 
 ## Executive Overview
 
-Predict `event_active` (binary classification) across `53` structured predictors on `MABe-mouse-behavior-detection` under strict leak-free 5-fold out-of-fold validation to maximize `INTERVAL_F1`.
+Predict `event_active` (binary classification) across `55` structured predictors on `MABe-mouse-behavior-detection` under strict leak-free 5-fold out-of-fold validation to maximize `INTERVAL_F1`.
 
 Production data science teams need pipelines that are not only accurate, but **readable, explainable, and maintainable**. Every transformation in this repository is organized by pipeline topology stage (`preprocessing`, `feature_engineering`, `objective`, `models`, `postprocess`) and validated incrementally via **sovLoop** (operating in private stealth mode).
 
@@ -36,9 +36,9 @@ Production data science teams need pipelines that are not only accurate, but **r
 | **Challenge / Dataset** | **MABe Mouse Behavior Detection** (`MABe-mouse-behavior-detection`) |
 | **Target Variable (`y`)** | `event_active` (`binary_classification`) |
 | **Evaluation KPI** | `INTERVAL_F1` (Higher is better) |
-| **Baseline 5-Fold OOF Score** | `0.74052` |
-| **Champion 5-Fold OOF Score** | **`0.84025`** (`+0.09973` verified lift vs. baseline) |
-| **Cross-Fold Stability (Std. Dev.)** | `±0.02048` across `5` strict folds |
+| **Baseline 5-Fold OOF Score** | `0.00000` |
+| **Champion 5-Fold OOF Score** | **`0.38043`** (`+0.38043` verified lift vs. baseline) |
+| **Cross-Fold Stability (Std. Dev.)** | `±0.00986` across `5` strict folds |
 | **Synthesis LLM** | `qwen3.5:9b` (via **sovLoop**) |
 
 ---
@@ -49,7 +49,7 @@ Every individual model inside the unrestricted ensemble is benchmarked independe
 
 | Model Family (`key`) | Standalone Val Score | Mean Fold Fit | Mean Fold Inference | Ensemble Weight | Deployment Role |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **CatBoost Symmetric** (`catboost`) | `0.84031 ± 0.02048` | `12540.7 ms` | `105.61 ms` | `100.0%` | `Best Solo + Fastest SLA` |
+| **Optuna LightGBM** (`lgbm`) | `0.83964 ± 0.02301` | `12382.6 ms` | `118.50 ms` | `100.0%` | `Best Solo + Fastest SLA` |
 
 ---
 
@@ -59,11 +59,8 @@ Every row below corresponds to a verified out-of-fold promotion recorded as an *
 
 | Iteration | Module Evolved | Active Synthesis Operations | 5-Fold OOF `INTERVAL_F1` | Lift | Engineering Rationale |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Gen 0** | `scaffold` | Baseline initialization | `0.74052` | `baseline` | Deterministic 5-fold leak-free baseline anchor |
-| **Gen 1** | `pipeline/models.py` | `catboost_tuned` | `0.83501` | `+0.09449` | Coordinate-ascent probe on `model`: Evaluate single estimator `CatBoost Symmetric GBDT (Ordered Boosting)` |
-| **Gen 2** | `pipeline/preprocess.py` | `median_impute`, `missing_indicators`, `robust_zscore`, `oof_target_encoding` | `0.83974` | `+0.00473` | Replacing mean_impute with median_impute, missing_indicators, robust_zscore, and oof_target_encoding will neutralize the 1.53x performance gap caused by... |
-| **Gen 3** | `pipeline/features.py` | `synth:log1p:is_self_pair`, `synth:log1p:agent_id` | `0.84009` | `+0.00035` | The plateau stems from heavy-tailed numeric distortions in `is_self_pair` and `agent_id` masking signal, while the rare category 3 in `lab_id`... |
-| **Gen 4** | `pipeline/preprocess.py` | `median_impute`, `missing_indicators`, `robust_zscore`, `oof_target_encoding`, `winsorize_iqr` | `0.84025` | `+0.00016` | Winsorization of skewed numeric features (`is_self_pair`, `agent_id`) will mitigate the high-magnitude OOF residuals in the upper tail by capping... |
+| **Gen 0** | `scaffold` | Baseline initialization | `0.00000` | `baseline` | Deterministic 5-fold leak-free baseline anchor |
+| **Gen 1** | `pipeline/models.py` | `lgbm_optuna_tuned`, `temporal_1d_tcn_bigru` | `0.38043` | `+0.38043` | [Phase-2 Neural/Foundation Extension 5/14] Add `temporal_1d_tcn_bigru` onto Phase-1 champion & reweight OOF blend |
 
 ---
 
@@ -71,13 +68,13 @@ Every row below corresponds to a verified out-of-fold promotion recorded as an *
 
 ```mermaid
 flowchart LR
-    DATA["Raw Data (53 predictors)"] --> SPLIT["5-Fold CV Split"]
-    SPLIT --> PRE["1. Preprocessing: median_impute, missing_indicators, robust_zscore, oof_target_encoding, +1 more"]
-    PRE --> FEAT["2. Features: synth:log1p:is_self_pair, synth:log1p:agent_id"]
+    DATA["Raw Data (55 predictors)"] --> SPLIT["5-Fold CV Split"]
+    SPLIT --> PRE["1. Preprocessing: mean_impute"]
+    PRE --> FEAT["2. Features: raw_passthrough"]
     FEAT --> OBJ["3. Objective: standard_task_loss"]
-    OBJ --> M0["4. Ensemble: CatBoost Symmetric (100%)"]
+    OBJ --> M0["4. Ensemble: Optuna LightGBM (100%)"]
     M0 --> POST["5. Post-Processing: identity_passthrough"]
-    POST --> OUT["5-Fold OOF & Holdout (INTERVAL_F1 = 0.84025)"]
+    POST --> OUT["5-Fold OOF & Holdout (INTERVAL_F1 = 0.38043)"]
 ```
 
 | Deliverable | Role in Production Workflow |
