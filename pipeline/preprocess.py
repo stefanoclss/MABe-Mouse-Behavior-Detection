@@ -1,7 +1,7 @@
 """Stage 1 · Fold-Safe Data Hygiene & Preprocessing (`pipeline/preprocess.py`).
 
 Synthesized by sovLoop (Model: qwen3.5:9b)
-Active Operations: median_impute, missing_indicators, robust_zscore, oof_target_encoding
+Active Operations: median_impute, missing_indicators, robust_zscore, oof_target_encoding, winsorize_iqr
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-ACTIVE_PREPROCESS_OPS: tuple[str, ...] = ('median_impute', 'missing_indicators', 'robust_zscore', 'oof_target_encoding')
+ACTIVE_PREPROCESS_OPS: tuple[str, ...] = ('median_impute', 'missing_indicators', 'robust_zscore', 'oof_target_encoding', 'winsorize_iqr')
 SCHEMA_CATEGORICAL_SAMPLE: list[str] = ['lab_id']
 SCHEMA_NUMERIC_SAMPLE: list[str] = ['agent_id', 'target_id', 'frame', 'ag_speed_bc', 'ag_speed_nose', 'ag_acc_bc', 'ag_body_len', 'ag_head_len', 'ag_ear_w', 'ag_tail_len', 'ag_elongation', 'ag_abs_turn']
 
